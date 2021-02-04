@@ -1,5 +1,5 @@
-'use strict';
-const data = require('./photos.json')
+"use strict";
+const data = require("./photos.json");
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -11,15 +11,13 @@ module.exports = {
      *   name: 'John Doe',
      *   isBetaMember: false
      * }], {});
-    */
-      data.forEach(el => {
-        el.createdAt = new Date()
-        el.updatedAt = new Date()
-      })
+     */
+    data.forEach((el) => {
+      el.createdAt = new Date();
+      el.updatedAt = new Date();
+    });
 
-      await queryInterface.bulkInsert('Photos', data, {})
-    
-
+    await queryInterface.bulkInsert("Photos", data, {});
   },
 
   down: async (queryInterface, Sequelize) => {
@@ -30,6 +28,6 @@ module.exports = {
      * await queryInterface.bulkDelete('People', null, {});
      */
 
-     await queryInterface.bulkDelete('Photos', null, {})
-  }
+    await queryInterface.bulkDelete("Photos", null, {});
+  },
 };

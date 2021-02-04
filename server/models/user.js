@@ -1,7 +1,7 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { hash } = require("../helper/bcrypt");
+
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -10,47 +10,67 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      User.hasMany(models.Photo)
+      User.hasMany(models.Photo);
     }
-  };
-  User.init({
-    email: {
-      type: DataTypes.STRING,
-      validate: {
-        notEmpty: {
-          args: true,
-          msg: "email required"
+  }
+  User.init(
+    {
+      email: {
+        type: DataTypes.STRING,
+        validate: {
+          notEmpty: {
+            args: true,
+            msg: "email required",
+          },
+          isEmail: true,
         },
-        isEmail: true
-      }
-    },
-    password: {
-      type: DataTypes.STRING,
-      validate: {
-        len: {
-          args: [8, 255],
-          msg: "password length must be greater than 7"
+      },
+      password: {
+        type: DataTypes.STRING,
+        validate: {
+          len: {
+            args: [8, 255],
+            msg: "password length must be greater than 7",
+          },
+          isUpperCase(password) {
+            if (!password.match(/[A-Z]/g)) {
+              throw {
+                name: "Bad Request",
+                message: "password must include upper case",
+                status: 400,
+              };
+            }
+          },
+          isLowerCase(password) {
+            if (!password.match(/[a-z]/g)) {
+              throw {
+                name: "Bad Request",
+                message: "password must include lower case",
+                status: 400,
+              };
+            }
+          },
+          isNumber(password) {
+            if (!password.match(/[0-9]/g)) {
+              throw {
+                name: "Bad Request",
+                message: "password must include number",
+                status: 400,
+              };
+            }
+          },
         },
-        isUpperCase(password) {
-          if(!password.match(/[A-Z]/g)) {
-            throw { name: "Bad Request", message: "password must include upper case", status: 400 }
-          }
-        },
-        isLowerCase(password) {
-          if(!password.match(/[a-z]/g)) {
-            throw { name: "Bad Request", message: "password must include lower case", status: 400 }
-          }
-        },
-        isNumber(password) {
-          if(!password.match(/[0-9]/g)) {
-            throw { name: "Bad Request", message: "password must include number", status: 400 }
-          }
-        }
       },
     },
-  }, {
-    sequelize,
-    modelName: 'User',
-  });
+    {
+      sequelize,
+      hooks: {
+        beforeCreate: (user, opt) => {
+          user.password = hash(user.password);
+        },
+      },
+      modelName: "User",
+    }
+  );
   return User;
 };
